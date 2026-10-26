@@ -89,7 +89,7 @@ def get_activities():
 
 
 @app.post("/activities/{activity_name}/signup")
-def signup_for_activity(activity_name: str, email: str):
+async def signup_for_activity(activity_name: str, email: str):
     """Sign up a student for an activity"""
     # Validate activity exists
     if activity_name not in activities:
@@ -115,9 +115,10 @@ def remove_from_activity(activity_name: str, email: str):
         raise HTTPException(status_code=404, detail="Activity not found")
 
     activity = activities[activity_name]
-    if email not in activity["participants"]:
+    try:
+        activity["participants"].remove(email)
+    except ValueError:
         raise HTTPException(
             status_code=404, detail="Student is not signed up for this activity")
 
-    activity["participants"].remove(email)
     return {"message": f"Removed {email} from {activity_name}"}
